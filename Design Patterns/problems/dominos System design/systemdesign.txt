@@ -1,0 +1,106 @@
+Functional Features 
+
+    1 Customers can view different products and nearbuy restaurants 
+    2 Customers can search for products[search]
+    3 Order a pizza [payment include]
+    4 See the status of the order                       
+
+Non-Functional Requirement
+
+   Admin Dashboards 
+   Geo locating delivery boys Scaling
+   Availibility of the app
+   Performance and latency
+
+
+Roles 
+ customers 
+ chains 
+ deliveryBoy
+ Admins
+
+Scalability 
+ 
+ 1. 1k Users -- 2kb * 1000 = 2mb data
+ 2. 100k users -- 2mb * 100 = 200mb data
+ 3. 1Million users -- 200mb * 10 = 2000mb ~ 2GB data
+
+ lets say a customer has a data like name addresses and card details 2kb / customer 
+
+ 30 percent of the customers order daily 
+ if one order is of 1kb 
+ -Weekdays => 30 percent
+    1. 1k Users * 0.3 = 300 orders / day = 0.3 orders / min  == its low and pretty much scalable on a single server  ==> data used per day => 300kb data per day 
+    2. 100k users * 0.3 = 30000 orders / day~21 orders/minute ~ 0.4 orders / sec ==> 30mb data per day 
+    3. 1Million users * 0.3 = 300000 orders/day ~ 1 orders / sec  ==> 300 mb data per day 
+ -Weekends => 50 percent
+    1. 1k Users * 0.5 = 500 orders / day = 0.3 orders / min  == its low and pretty much scalable on a single server 
+    2. 100k users * 0.5 = 50000 orders / day~21 orders/minute ~ 0.4 orders / sec 
+    3. 1Million users * 0.5 = 500000 orders/day ~  11 orders / sec 
+
+    same for weekends 500kb , 50mb , 500mb per day respectively 
+
+
+Approach 
+    
+    I believe Monolithic architecture will be very hard to maintain in this kind of a system as you have multiple services which are kind of independant of each other 
+
+    Microservice architecture will be best for this kind of setting 
+
+    Microservices that will be provided 
+
+     - order delivery and menu,restaurant seaching app for customers 
+     - dashboard and delivery app for delivery boys 
+     - dashboard of  current orders  app for chains 
+     - Management app for Admins
+
+
+API Design 
+
+    There will be 4 Different microservices as mentioned above 
+
+    APIS for dashboard and delivery app for delivery boys 
+     1. POST /  Account Creation User Authentication 
+     2. GET / View orders in their designated area 
+     3. POST / Accept Orders of the Consumer 
+     4. PUT / Update Order Status 
+     5. added Payment gateway according to the incentive they get delivery 
+
+    APIS for order delivery and menu,restaurant seaching app for customers 
+     1. POST /  Account Creation User Authentication 
+     2. GET / View Restaurants and search functionality
+     3. GET / Menu of a particular restaurant Search / sort /  filter functionalities as well 
+     4. POST / Order Booking 
+     5. GET / Order Status 
+     6. Added Payment Gateway for payments 
+
+    APIS for dashboard of  current orders  app for chains 
+     1. GET / Orders on their current chain 
+     2. PUT / Change Order Status 
+     3. POST / Assign Orders on Delivery boy Dashboards 
+     4. PUT or POST or DELETE / Change , add or delete menu of their chains according to the availibility of their raw materials 
+    
+    Management app for Admins
+     1. POST or DELETE / Add or delete restaurant chains 
+     2. GET / Current number of user statistics 
+     3. GET  / Analytics on traffic for each chain and location 
+     5. GET / Keep track of delivery boys and avg time per delivery 
+     4. Payment system for Salary Disembersement for chain employees as well as Delivery boys 
+
+    There can be many more things which can be added but this are some of the main features 
+
+
+DataBase Management
+
+ I think for orders and payments sql Data base shhould be the best option as you want the DB to be Atomic as the ORM like sequelize give that transaction feature. And also it will be not be that much readheavy 
+ In terms of AWS we can use AWS RDS (Relational Database Service ) we can go with MySql setup here or any other as well like postgres
+
+ For User Details , Restaurant Chain Details , NoSql Database will be best . As these Will be readheavy databases and also it has to be pretty dynamic like one restaurant has multiple menus . One user has multiple addresses and we need to store previous order ID also In this scenario DynamoDB will be a best fit 
+ For storing Images and videos for chains we can use S3 bucket as well and link it with some sort of ID in our DynamoDB
+
+
+In terms Of Powe Outage in an area we need to build a failover mechanisms for it we can Customize the load balancer for that purpose 
+
+
+ 
+
